@@ -1,4 +1,5 @@
-use std::net::{TcpListener};
+use std::io::prelude::*;
+use std::net::{TcpListener, TcpStream};
 use std::process::exit;
 
 fn main() {
@@ -12,16 +13,25 @@ fn main() {
 			exit(0x1);
 		},
 	}
-	match listener.unwrap().accept() {
-		Ok((_socket, addr)) => println!("New client connected from {}", addr),
+	let listener = listener.unwrap();
+	match listener.accept() {
+		Ok((socket, addr)) => {
+			println!("New client connected from {}", addr);
+			handle_connection(socket);
+		}
 		Err(e) => {
 			println!("accept() error: {}", e);
 			exit(0x2);
 		}
 	}
 }
-/*
-fn handle_connection(stream : TcpStream) {
-	stream.read();
+
+fn handle_connection(mut s : TcpStream) {
+	let mut buffer = [0; 2048];
+	match s.read(&mut buffer) {
+		Ok(_) => {
+			s.write(&buffer).unwrap();
+		},
+		Err(e) => println!("read() error: {}", e),
+	}
 }
-*/
